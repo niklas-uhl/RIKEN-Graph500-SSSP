@@ -20,6 +20,20 @@ set(RIKEN_VERTEX_REORDERING_MODE "2" CACHE STRING "Vertex reordering mode")
 set(MY_SYSTEM "Default" CACHE STRING "System to run on")
 set(GCC_BASE -Drestrict=__restrict__ -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS -ffast-math -msse4.2)
 
+include(FetchContent)
+
+set(KAGEN_BUILD_APPS OFF)
+set(KAGEN_BUILD_EXAMPLES OFF)
+set(KAGEN_NODEPS ON)
+FetchContent_Declare(kagen
+  GIT_REPOSITORY https://github.com/KarlsruheGraphGeneration/KaGen
+  GIT_TAG 49dea30
+  SYSTEM
+)
+
+FetchContent_MakeAvailable(kagen)
+target_compile_features(kagen PUBLIC cxx_std_20)
+
 # # make 'Release' the default build type
 # if(NOT CMAKE_BUILD_TYPE)
 #     set(CMAKE_BUILD_TYPE Release)
@@ -47,10 +61,6 @@ find_package(MPI REQUIRED)
 if (1)
     # add_compile_options(${GCC_BASE})
 endif()
-
-
-
-
 
 add_subdirectory(apps)
 add_subdirectory(src)

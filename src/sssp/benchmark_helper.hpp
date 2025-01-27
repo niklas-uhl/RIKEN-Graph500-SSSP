@@ -17,6 +17,9 @@
 #define BENCHMARK_HELPER_HPP_
 
 #include "logfile.h"
+#include <algorithm>
+#include <kagen.h>
+#include <mpi.h>
 
 #if ENABLE_FJMPI_RDMA
 #include <mpi-ext.h>
@@ -302,6 +305,38 @@ void generate_graph(EdgeList* edge_list, const GraphGenerator<typename EdgeList:
 	edge_list->endWrite();
 	free(edge_buffer);
 	if(mpi.isMaster()) print_with_prefix("Finished generating.");
+}
+
+template<typename EdgeList>
+void generate_graph_kagen(EdgeList* edge_list, std::string const& kagen_option_string) {
+  kagen::KaGen gen(mpi.comm_2d);
+  kagen::Graph graph = gen.GenerateFromOptionString(kagen_option_string);
+
+  auto [min, max] = std::minmax_element(graph.edge_weights.begin(), graph.edge_weights.end());
+  auto weight_to_float = [&](kagen::SSInt weight) -> float {
+    return static_cast<float>(weight - *min) / (*max - *min + 1);
+  };
+  
+  using EdgeType = EdgeList::edge_type;
+  EdgeType* edge_buffer = static_cast<EdgeType*> (cache_aligned_xmalloc(EdgeList::CHUNK_SIZE*sizeof(EdgeType)));
+  edge_list->beginWrite();
+  uint64_t num_chunks = (graph.edges.size()  + EdgeList::CHUNK_SIZE - 1) / EdgeList::CHUNK_SIZE;
+  MPI_Allreduce(MPI_IN_PLACE, &num_chunks, 1, MPI_UINT64_T, MPI_MAX, mpi.comm_2d);
+  for (uint64_t chunk_idx = 0; chunk_idx < num_chunks; chunk_idx++) {
+    auto edge_begin = std::min(chunk_idx * EdgeList::CHUNK_SIZE, graph.edges.size());
+    auto edge_end = std::min(edge_begin + EdgeList::CHUNK_SIZE, graph.edges.size());
+    std::size_t buffer_offset = 0;
+    for (auto edge_idx = edge_begin; edge_idx < edge_end; edge_idx++) {
+      auto v0 = graph.edges[edge_idx].first;
+      auto v1 = graph.edges[edge_idx].second;
+      EdgeType& edge = edge_buffer[buffer_offset++];
+
+      edge.set(v0, v1, weight_to_float(graph.edge_weights[edge_idx]));
+    }
+    edge_list->write(edge_buffer, edge_end - edge_begin);
+  }
+  edge_list->endWrite();
+  free(edge_buffer);
 }
 
 template <typename EdgeList>

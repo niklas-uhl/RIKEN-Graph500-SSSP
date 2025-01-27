@@ -3,6 +3,7 @@ add_executable(sssp-parallel main.cc)
 # if( "${MY_SYSTEM}" STREQUAL "Fugaku" ) target_link_libraries(sssp-parallel
 # PUBLIC ) else()
 target_link_libraries(sssp-parallel PUBLIC OpenMP::OpenMP_CXX MPI::MPI_CXX)
+target_link_libraries(sssp-parallel PRIVATE KaGen::KaGen)
 # endif()
 
 # todo make user flags!

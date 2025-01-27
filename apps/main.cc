@@ -15,6 +15,7 @@
  */
 
 // C includes
+#include <kagen.h>
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
+#include <getopt.h>
 
 // C++ includes
 #include <string>
@@ -38,7 +40,7 @@
 #include "../src/sssp/sssp_presol.hpp"
 
 static
-void run_graph500sssp(int SCALE, int edgefactor)
+void run_graph500sssp(int SCALE, int edgefactor, std::string const& kagen_option_string = "")
 {
 	using namespace PRM;
 	SET_AFFINITY;
@@ -58,7 +60,12 @@ void run_graph500sssp(int SCALE, int edgefactor)
 
 	if(mpi.isMaster()) print_with_prefix("Graph generation");
 	double generation_time = MPI_Wtime();
-	generate_graph_spec2010(&edge_list, SCALE, edgefactor);
+	if (kagen_option_string == "") {
+	  generate_graph_spec2010(&edge_list, SCALE, edgefactor);
+	} else {
+	  printf("Using Kagen with option string: %s\n", kagen_option_string.c_str());
+	  generate_graph_kagen(&edge_list, kagen_option_string);
+	}
 	generation_time = MPI_Wtime() - generation_time;
 
 	//edge_list.writeGraphToFile(("first_list" + std::to_string(mpi.rank) + ".txt").c_str());
@@ -229,24 +236,48 @@ void run_graph500sssp(int SCALE, int edgefactor)
 
 int main(int argc, char** argv)
 {
-	// Parse arguments.
-	int SCALE = 16;
-	int edgefactor = 16; // nedges / nvertices, i.e., 2*avg. degree
-	if (argc >= 2) SCALE = atoi(argv[1]);
-	if (argc >= 3) edgefactor = atoi(argv[2]);
-	if (argc <= 1 || argc >= 4 || SCALE == 0 || edgefactor == 0) {
-		fprintf(IMD_OUT, "Usage: %s SCALE edgefactor\n"
-				"SCALE = log_2(# vertices) [integer, required]\n"
-				"edgefactor = (# edges) / (# vertices) = .5 * (average vertex degree) [integer, defaults to 16]\n"
-				"(Random number seed are in main.c)\n",
-				argv[0]);
-		return 0;
-	}
+  // if option --kagen_option_string is passed, use its, value, else process the args normally
+  std::string kagen_option_string = "";
+  int c;
+  int digit_optind = 0;
+  while(true) {
+    
+    static struct option long_options[] = {
+      {"kagen_option_string", required_argument, 0, 0},
+      {0, 0, 0, 0}
+    };
+    c = getopt_long(argc, argv, "", long_options, &digit_optind);
+    if (c == -1)
+      break;
+    switch (c) {
+    case 0:
+      kagen_option_string = optarg;
+      break;
+    default:
+      break;
+    }
+  }
+  int SCALE = 16;
+  int edgefactor = 16; // nedges / nvertices, i.e., 2*avg. degree
+  if (kagen_option_string == "") {
+    // Parse arguments.
 
-	setup_globals(argc, argv, SCALE, edgefactor);
+    if (argc >= 2) SCALE = atoi(argv[1]);
+    if (argc >= 3) edgefactor = atoi(argv[2]);
+    if (argc <= 1 || argc >= 4 || SCALE == 0 || edgefactor == 0) {
+      fprintf(IMD_OUT, "Usage: %s SCALE edgefactor\n"
+	      "SCALE = log_2(# vertices) [integer, required]\n"
+	      "edgefactor = (# edges) / (# vertices) = .5 * (average vertex degree) [integer, defaults to 16]\n"
+	      "(Random number seed are in main.c)\n",
+	      argv[0]);
+      return 0;
+    }
+  }
 
-	run_graph500sssp(SCALE, edgefactor);
+  setup_globals(argc, argv, SCALE, edgefactor);
 
-	cleanup_globals();
-	return 0;
+  run_graph500sssp(SCALE, edgefactor, kagen_option_string);
+
+  cleanup_globals();
+  return 0;
 }
