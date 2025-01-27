@@ -43,8 +43,6 @@ find_package(MPI REQUIRED)
 #     set(CMAKE_C_COMPILER  mpicc)
 # endif()
 
-add_compile_options(-Wall)
-
 # todo
 if (1)
     # add_compile_options(${GCC_BASE})

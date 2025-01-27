@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "warnings",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-Wall"
+      }
+    },
+    {
+      "name": "dev",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/dev",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "inherits": ["warnings"]
+    },
+    {
+      "name": "benchmark",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "inherits": ["warnings"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_FLAGS": "-Drestrict=__restrict__ -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS -ffast-math -msse4.2"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev"
+    },
+    {
+      "name": "benchmark",
+      "configurePreset": "benchmark"
+    }
+  ]
+}
