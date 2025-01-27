@@ -1,9 +1,5 @@
-add_library(sssp-seq 
-	csrgraph.cc
-	shortestpath.cc
-)
+add_library(sssp-seq csrgraph.cc shortestpath.cc)
 
-target_include_directories(sssp-seq
-    PUBLIC
-    "${PROJECT_SOURCE_DIR}/src/sssp-sequential/"
-)
+target_include_directories(sssp-seq PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+
+target_compile_features(sssp-seq PUBLIC cxx_std_14)

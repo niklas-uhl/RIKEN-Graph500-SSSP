@@ -1,14 +1,3 @@
-add_library(generator
-    splittable_mrg.c
-)
+add_library(generator splittable_mrg.c)
 
-
-target_link_libraries(generator
-    PRIVATE
-    utils
-)
-
-target_include_directories(generator
-    PUBLIC
-    "${PROJECT_SOURCE_DIR}/src/generator/"
-)
+target_include_directories(generator PUBLIC ${CMAKE_CURRENT_LIST_DIR})
