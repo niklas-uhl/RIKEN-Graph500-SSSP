@@ -10,6 +10,8 @@
 
 
 //#define REAL_BENCHMARK
+#include <stdint.h>
+
 #define USE_DISTANCE_LOCKS 1
 #define USE_PROPER_HASHMAP 0
 #define BELLMAN_FORD_SWITCH_RATIO 0.98

@@ -24,6 +24,7 @@
 #include <fstream>
 
 #include "mpi_workarounds.h"
+#include "utils.hpp"
 
 #define FAST_64BIT_ARITHMETIC
 #include "splittable_mrg.h"

@@ -20,6 +20,7 @@
 #include <deque>
 #include <limits>
 #include <iostream>
+#include "graph_constructor.hpp"
 #include "utils.hpp"
 #include "fiber.hpp"
 #include "abstract_comm.hpp"

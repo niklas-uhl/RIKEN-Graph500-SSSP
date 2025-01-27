@@ -18,8 +18,14 @@
 #define GRAPH_CONSTRUCTOR_HPP_
 
 #include "parameters.h"
-#include "limits.h"
+#include "utils.hpp"
+#include "utils_core.hpp"
+#include <cstddef>
+#include <limits>
+#include <cstdint>
+#include <vector>
 #include "graph.hpp"
+#include <mpi.h>
 
 namespace detail {
 
