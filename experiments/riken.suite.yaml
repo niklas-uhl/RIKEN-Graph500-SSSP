@@ -1,0 +1,55 @@
+name: riken
+executable: apps/sssp-parallel
+ncores: [32, 64, 128, 256, 512, 1024, 2048, 4096]
+time_limit: 5
+threads_per_rank: [1]
+tasks_per_node: 32
+graphs:
+  - generator: kagen
+    type: gnm-undirected
+    N: 15
+    M: 18
+    edgeweights_generator: uniform_random
+    edgeweights_range_begin: 1
+    edgeweights_range_end: 1000
+    scale_weak: TRUE
+  - generator: kagen
+    type: rgg2d
+    N: 15
+    M: 18
+    edgeweights_generator: uniform_random
+    edgeweights_range_begin: 1
+    edgeweights_range_end: 1000
+    scale_weak: TRUE
+  - generator: kagen
+    type: rgg3d
+    N: 15
+    M: 18
+    edgeweights_generator: uniform_random
+    edgeweights_range_begin: 1
+    edgeweights_range_end: 1000
+    scale_weak: TRUE
+  - generator: kagen
+    type: rhg
+    N: 15
+    M: 18
+    gamma: 2.6
+    edgeweights_generator: uniform_random
+    edgeweights_range_begin: 1
+    edgeweights_range_end: 1000
+    scale_weak: TRUE
+  - generator: kagen
+    type: rmat
+    N: 15
+    M: 18
+    a: 0.57
+    b: 0.19
+    c: 0.19
+    edgeweights_generator: uniform_random
+    edgeweights_range_begin: 1
+    edgeweights_range_end: 1000
+    scale_weak: TRUE
+config: [
+{
+}
+]

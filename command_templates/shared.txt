@@ -1,0 +1,1 @@
+PRESOL_SECONDS=0 mpiexec -n ${mpi_ranks} ${cmd}
