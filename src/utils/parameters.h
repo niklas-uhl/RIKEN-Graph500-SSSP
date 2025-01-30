@@ -169,7 +169,7 @@ enum {
 #ifdef REAL_BENCHMARK
 	NUM_SSSP_ROOTS = 64, // spec: 64
 #else
-	NUM_SSSP_ROOTS = 16,
+	NUM_SSSP_ROOTS = 3,
 #endif
 #if CUDA_ENABLED
 	PACKET_LENGTH = 256,

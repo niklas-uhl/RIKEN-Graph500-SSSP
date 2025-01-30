@@ -63,7 +63,7 @@ void run_graph500sssp(int SCALE, int edgefactor, std::string const& kagen_option
 	if (kagen_option_string == "") {
 	  generate_graph_spec2010(&edge_list, SCALE, edgefactor);
 	} else {
-	  printf("Using Kagen with option string: %s\n", kagen_option_string.c_str());
+	  if(mpi.isMaster()) print_with_prefix("Using Kagen with option string: %s", kagen_option_string.c_str());
 	  generate_graph_kagen(&edge_list, kagen_option_string);
 	}
 	generation_time = MPI_Wtime() - generation_time;
@@ -134,17 +134,25 @@ void run_graph500sssp(int SCALE, int edgefactor, std::string const& kagen_option
                 }
                MPI_Bcast(&time_left, 1, MPI_DOUBLE, 0, mpi.comm_2d);
         }
+	bool do_presol = true;
+	const char* presol_time_char = std::getenv("PRESOL_SECONDS");
 
-#if 1
-      const int niterations = 4000;
-      sssp_presolver.presolve_sssp(niterations, pred, dist);
+	if( presol_time_char ) {
+	  if (std::stoi(presol_time_char) == 0) {
+	    do_presol=false;
+	  }
+	}
 
-      MPI_Barrier(mpi.comm_2d);
-      if(mpi.isMaster()) print_with_prefix("Preproc is finished \n");
-      num_sssp_roots = NUM_SSSP_ROOTS;
-      find_roots_presolved(sssp_instance.graph_, sssp_roots, num_sssp_roots);
-    //MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
-#endif
+	if (do_presol){
+	  const int niterations = 4000;
+	  sssp_presolver.presolve_sssp(niterations, pred, dist);
+
+	  MPI_Barrier(mpi.comm_2d);
+	  if(mpi.isMaster()) print_with_prefix("Preproc is finished \n");
+	  num_sssp_roots = NUM_SSSP_ROOTS;
+	  find_roots_presolved(sssp_instance.graph_, sssp_roots, num_sssp_roots);
+	  //MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+	}
 
 
 /////////////////////

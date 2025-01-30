@@ -17,6 +17,7 @@
 #define BENCHMARK_HELPER_HPP_
 
 #include "logfile.h"
+#include "utils.hpp"
 #include <algorithm>
 #include <kagen.h>
 #include <mpi.h>
@@ -311,8 +312,8 @@ template<typename EdgeList>
 void generate_graph_kagen(EdgeList* edge_list, std::string const& kagen_option_string) {
   kagen::KaGen gen(mpi.comm_2d);
   kagen::Graph graph = gen.GenerateFromOptionString(kagen_option_string);
-
   auto [min, max] = std::minmax_element(graph.edge_weights.begin(), graph.edge_weights.end());
+  if (mpi.isMaster()) print_with_prefix("Edge weights are in range [%d, %d], normalizing to [0, 1)", *min, *max);
   auto weight_to_float = [&](kagen::SSInt weight) -> float {
     return static_cast<float>(weight - *min) / (*max - *min + 1);
   };
@@ -506,6 +507,7 @@ void decode_edge(GraphType& g, int64_t e0, int64_t e1, int64_t& v0, int64_t& v1,
 	v1 = (v1_high << log_size_r) | rank_r;
 }
 
+/// selects num_bfs_roots root vertices, synchronized on all PEs
 template <typename GraphType>
 void find_roots(GraphType& g, int64_t* bfs_roots, int& num_bfs_roots)
 {
